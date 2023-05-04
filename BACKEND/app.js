@@ -1,15 +1,31 @@
 const express = require("express");
 const userRouter = require("./routes/users");
 
+const logger = require('./middlewares/logger')
+
 const PORT = 4000;
 const app = express();
 app.use(express.json()); //Middleware to parse json body received in request.
+app.use(express.static('public')); //Middleware to make public folder to serve static content
 
-app.get("/", (req, res) => {
+
+//Custom middleware
+
+app.use((req, res, next)=>{
+  console.log(req.method, req.url)
+  next()
+})
+
+//External custom middleware that runs only in development environment
+if(app.get('env')=='development'){
+  app.use(logger);
+}
+
+app.get("/api", (req, res) => {
   res.status(200).send({ status: "Server is running" });
 });
 
-
+ 
 
 app.use("/api/users", userRouter);
 
@@ -27,9 +43,13 @@ app.use("/api/users", userRouter);
 //     res.send(course);
 // })
 
-// app.get('api//search',(req,res)=>{
+// app.get('api/search',(req,res)=>{
 //     const query =request.query
 //     console.log(query.id)
 // })
 
 app.listen(PORT, () => console.log(`Express app runniing on ${PORT}`));
+
+
+
+
