@@ -14,39 +14,6 @@ function createErrorResponse(status, message) {
   };
 }
 
-router.get("/", async (req, res) => {
-  const query = req.query;
-  if (query.id) {
-    // using async await
-    try {
-      const user = await User.findById(query.id);
-      res.send(user);
-    } catch (e) {
-      res.send(e.message);
-    }
-  } else {
-    //using promises
-    User.find()
-      .select("name email -_id")
-      .then((users) => {
-        res.send(users);
-      })
-      .catch((err) => res.send(err.message));
-  }
-});
-
-router.post("/", (req, res) => {
-  const user = req.body;
-  User.create(user)
-    .then((usr) =>
-      res.send({
-        msg: "User created sucessfully.",
-        usr,
-      })
-    )
-    .catch((err) => res.send(err.message));
-});
-
 //signup
 router.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
@@ -135,14 +102,46 @@ router.post("/login", async (req, res) => {
 });
 
 //Logout
-
-router.post("/logout", async (req, res) => {
+router.post("/logout", (req, res) => {
   if (req.signedCookies.user) {
     res.clearCookie("user");
     res.send("You are logged out");
   } else {
     res.status(400).send(createErrorResponse(400, "You are not logged in"));
   }
+});
+
+router.get("/", async (req, res) => {
+  const query = req.query;
+  if (query.id) {
+    // using async await
+    try {
+      const user = await User.findById(query.id);
+      res.send(user);
+    } catch (e) {
+      res.send(e.message);
+    }
+  } else {
+    //using promises
+    User.find()
+      .select("name email -_id")
+      .then((users) => {
+        res.send(users);
+      })
+      .catch((err) => res.send(err.message));
+  }
+});
+
+router.post("/", (req, res) => {
+  const user = req.body;
+  User.create(user)
+    .then((usr) =>
+      res.send({
+        msg: "User created sucessfully.",
+        usr,
+      })
+    )
+    .catch((err) => res.send(err.message));
 });
 
 router.put("/:id", (req, res) => {
