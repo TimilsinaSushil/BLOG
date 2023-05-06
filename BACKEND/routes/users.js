@@ -69,6 +69,13 @@ router.post("/signup", async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, salt);
 
       const user = await User.create({ email, name, password: hashedPassword });
+
+      //setting cookie in response
+      res.cookie("user", user.email, {
+        signed: true,
+        maxAge: 2 * 60 * 1000,
+      });
+
       res.send({
         status: 200,
         message: "User registered sucessfully",
@@ -83,6 +90,14 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
+  //checking user is logged in or not using cookie
+
+  if (req.signedCookies.user) {
+    res.status(400).send("You are already logged in");
+    return;
+  }
+
+  // validating email format
   if (!validator.isEmail(email)) {
     res.status(400).send(createErrorResponse(400, "Invalid email"));
     return;
@@ -104,6 +119,11 @@ router.post("/login", async (req, res) => {
         return;
       }
       if (isMatch) {
+        //setting cookie in response
+        res.cookie("user", user.email, {
+          signed: true,
+          maxAge: 2 * 60 * 1000,
+        });
         res.send({ status: 200, message: "Login Successful" });
       } else {
         res.status(400).send(createErrorResponse(400, "Incorrect Password"));
@@ -111,6 +131,17 @@ router.post("/login", async (req, res) => {
     }
   } catch (e) {
     res.status(400).send(createErrorResponse(400, e.message));
+  }
+});
+
+//Logout
+
+router.post("/logout", async (req, res) => {
+  if (req.signedCookies.user) {
+    res.clearCookie("user");
+    res.send("You are logged out");
+  } else {
+    res.status(400).send(createErrorResponse(400, "You are not logged in"));
   }
 });
 

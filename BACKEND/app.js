@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cookieParser = require('cookie-parser')
 
 
 //router
@@ -19,6 +20,7 @@ mongoose.connect('mongodb://localhost:27017/quiz')
 .catch((err)=>console.log('Err: ', err.message))
 
 app.use(express.json()); //Middleware to parse json body received in request.
+app.use(cookieParser("1234-5678")); //Middleware to parse cookie (cookie is singned usinf provided key)
 app.use(express.static("public")); //Middleware to make public folder to serve static content
 
 //Custom middleware
