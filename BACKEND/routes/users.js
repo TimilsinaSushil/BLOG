@@ -1,6 +1,7 @@
 const express = require("express");
 const User = require("../models/userSchema");
 const router = express.Router();
+const bcrypt = require("bcryptjs");
 
 router.get("/", async (req, res) => {
   const query = req.query;
@@ -46,7 +47,11 @@ router.post("/signup", async (req, res) => {
     });
   else {
     try {
-      const user = await User.create({ email, name, password });
+      //hashing password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      const user = await User.create({ email, name, password: hashedPassword });
       res.send({
         status: 200,
         message: "User registered sucessfully",
@@ -58,6 +63,31 @@ router.post("/signup", async (req, res) => {
         error: e.message,
       });
     }
+  }
+});
+
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(400).send({
+        status: 400,
+        error: `${email} is not registered`,
+      });
+    } else {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
+        res.send({ status: 200, message: "Login Successful" });
+      } else {
+        res.status(400).send({ status: 400, error: "Incorrect password" });
+      }
+    }
+  } catch (e) {
+    res.status(400).send({
+      status: 400,
+      error: e.message,
+    });
   }
 });
 
