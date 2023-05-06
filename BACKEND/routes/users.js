@@ -35,6 +35,32 @@ router.post("/", (req, res) => {
     .catch((err) => res.send(err.message));
 });
 
+//signup
+router.post("/signup", async (req, res) => {
+  const { name, email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (user)
+    res.status(400).send({
+      status: 400,
+      error: `User with email ${email} already registered`,
+    });
+  else {
+    try {
+      const user = await User.create({ email, name, password });
+      res.send({
+        status: 200,
+        message: "User registered sucessfully",
+        user,
+      });
+    } catch (e) {
+      res.status(400).send({
+        status: 400,
+        error: e.message,
+      });
+    }
+  }
+});
+
 router.put("/:id", (req, res) => {
   User.findByIdAndUpdate(
     req.params.id,
@@ -54,13 +80,13 @@ router.put("/:id", (req, res) => {
 
 router.delete("/:id", (req, res) => {
   User.findByIdAndRemove(req.params.id)
-  .then((user) =>
-    res.send({
-      msg: 'User deleted!',
-      user,
-    })
-  )
-  .catch((err) => res.send(err.message));
+    .then((user) =>
+      res.send({
+        msg: "User deleted!",
+        user,
+      })
+    )
+    .catch((err) => res.send(err.message));
 });
 
 module.exports = router;
