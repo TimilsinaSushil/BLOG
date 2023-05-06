@@ -2,7 +2,17 @@ const express = require("express");
 const User = require("../models/userSchema");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const validator = require('validator')
+const validator = require("validator");
+
+// function to create error response
+function createErrorResponse(status, message) {
+  return {
+    status,
+    error: {
+      message,
+    },
+  };
+}
 
 router.get("/", async (req, res) => {
   const query = req.query;
@@ -40,20 +50,18 @@ router.post("/", (req, res) => {
 //signup
 router.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
-  if(!validator.isEmail(email)){
-    res.status(400).send({
-      status:400,
-      message:'Invalid email'
-    })
-    return
+  if (!validator.isEmail(email)) {
+    res.status(400).send(createErrorResponse(400, "Invalid email"));
+    return;
   }
 
   const user = await User.findOne({ email });
   if (user)
-    res.status(400).send({
-      status: 400,
-      error: `User with email ${email} already registered`,
-    });
+    res
+      .status(400)
+      .send(
+        createErrorResponse(400, `User with email ${email} already registered`)
+      );
   else {
     try {
       //hashing password
@@ -67,10 +75,7 @@ router.post("/signup", async (req, res) => {
         user,
       });
     } catch (e) {
-      res.status(400).send({
-        status: 400,
-        error: e.message,
-      });
+      res.status(400).send(createErrorResponse(400, e.message));
     }
   }
 });
@@ -78,34 +83,34 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  if(!validator.isEmail(email)){
-    res.status(400).send({
-      status:400,
-      message:'Invalid email'
-    })
-    return
+  if (!validator.isEmail(email)) {
+    res.status(400).send(createErrorResponse(400, "Invalid email"));
+    return;
   }
-  
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      res.status(400).send({
-        status: 400,
-        error: `${email} is not registered`,
-      });
+      res
+        .status(400)
+        .send(createErrorResponse(400, `${email} is not registered`));
     } else {
-      const isMatch = await bcrypt.compare(password, user.password);
+      try {
+        isMatch = await bcrypt.compare(password, user.password);
+      } catch (e) {
+        res
+          .status(500)
+          .send(createErrorResponse(500, "Error comparing passwords"));
+        return;
+      }
       if (isMatch) {
         res.send({ status: 200, message: "Login Successful" });
       } else {
-        res.status(400).send({ status: 400, error: "Incorrect password" });
+        res.status(400).send(createErrorResponse(400, "Incorrect Password"));
       }
     }
   } catch (e) {
-    res.status(400).send({
-      status: 400,
-      error: e.message,
-    });
+    res.status(400).send(createErrorResponse(400, e.message));
   }
 });
 
