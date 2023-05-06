@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/userSchema");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
+const validator = require('validator')
 
 router.get("/", async (req, res) => {
   const query = req.query;
@@ -39,6 +40,14 @@ router.post("/", (req, res) => {
 //signup
 router.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
+  if(!validator.isEmail(email)){
+    res.status(400).send({
+      status:400,
+      message:'Invalid email'
+    })
+    return
+  }
+
   const user = await User.findOne({ email });
   if (user)
     res.status(400).send({
@@ -68,6 +77,15 @@ router.post("/signup", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
+
+  if(!validator.isEmail(email)){
+    res.status(400).send({
+      status:400,
+      message:'Invalid email'
+    })
+    return
+  }
+  
   try {
     const user = await User.findOne({ email });
     if (!user) {
