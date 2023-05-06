@@ -1,6 +1,16 @@
 const express = require("express");
 const mongoose = require("mongoose");
+
+//for cookies
 const cookieParser = require('cookie-parser')
+
+//for session
+const session = require('express-session')
+const MongoDBSession = require('connect-mongodb-session')(session) //to store session info in mongo db
+const store = new MongoDBSession({
+  uri:'mongodb://localhost:27017/quiz',
+  collection:'session'
+})
 
 
 //router
@@ -20,7 +30,15 @@ mongoose.connect('mongodb://localhost:27017/quiz')
 .catch((err)=>console.log('Err: ', err.message))
 
 app.use(express.json()); //Middleware to parse json body received in request.
-app.use(cookieParser("1234-5678")); //Middleware to parse cookie (cookie is singned usinf provided key)
+
+// app.use(cookieParser("1234-5678")); //Middleware to parse cookie (cookie is singned usinf provided key)
+ 
+app  .use(session({
+  secret:"1234-5678", //for signing cookie
+  resave:false, // if there is no change in session it will not resave in database
+  saveUninitialized: false, //Doesn't save set bu uninitialized session
+  store:store //defined above (This is where session info stores in db)
+}))
 app.use(express.static("public")); //Middleware to make public folder to serve static content
 
 //Custom middleware

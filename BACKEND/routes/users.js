@@ -38,10 +38,12 @@ router.post("/signup", async (req, res) => {
       const user = await User.create({ email, name, password: hashedPassword });
 
       //setting cookie in response
-      res.cookie("user", user.email, {
-        signed: true,
-        maxAge: 2 * 60 * 1000,
-      });
+      // res.cookie("user", user.email, {
+      //   signed: true,
+      //   maxAge: 2 * 60 * 1000,
+      // });
+
+      req.session.isAuth = true;
 
       res.send({
         status: 200,
@@ -59,7 +61,14 @@ router.post("/login", async (req, res) => {
 
   //checking user is logged in or not using cookie
 
-  if (req.signedCookies.user) {
+  // if (req.signedCookies.user) {
+  //   res.status(400).send("You are already logged in");
+  //   return;
+  // }
+
+  //checking session info
+
+  if (req.session.isAuth) {
     res.status(400).send("You are already logged in");
     return;
   }
@@ -87,10 +96,14 @@ router.post("/login", async (req, res) => {
       }
       if (isMatch) {
         //setting cookie in response
-        res.cookie("user", user.email, {
-          signed: true,
-          maxAge: 2 * 60 * 1000,
-        });
+        // res.cookie("user", user.email, {
+        //   signed: true,
+        //   maxAge: 2 * 60 * 1000,
+        // });
+
+        //setting session info
+        req.session.isAuth = true;
+
         res.send({ status: 200, message: "Login Successful" });
       } else {
         res.status(400).send(createErrorResponse(400, "Incorrect Password"));
@@ -103,8 +116,15 @@ router.post("/login", async (req, res) => {
 
 //Logout
 router.post("/logout", (req, res) => {
-  if (req.signedCookies.user) {
-    res.clearCookie("user");
+  // if (req.signedCookies.user) {
+  //   res.clearCookie("user");
+  //   res.send("You are logged out");
+  // } else {
+  //   res.status(400).send(createErrorResponse(400, "You are not logged in"));
+  // }
+
+  if (req.session.isAuth) {
+    req.session.destroy();
     res.send("You are logged out");
   } else {
     res.status(400).send(createErrorResponse(400, "You are not logged in"));
