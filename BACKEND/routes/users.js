@@ -1,54 +1,66 @@
 const express = require("express");
+const User = require("../models/userSchema");
 const router = express.Router();
 
-var users = [
-  {
-    id: 1,
-    name: "sushil",
-  },
-  {
-    id: 2,
-    name: "Bimala",
-  },
-];
-
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   const query = req.query;
   if (query.id) {
-    const user = users.find((user) => user.id == query.id);
-    if (user) res.send(user);
-    else res.status(404).send({ error: `User with id ${query.id} not found` });
+    // using async await
+    try {
+      const user = await User.findById(query.id);
+      res.send(user);
+    } catch (e) {
+      res.send(e.message);
+    }
   } else {
-    res.send(users);
+    //using promises
+    User.find()
+      .select("name email -_id")
+      .then((users) => {
+        res.send(users);
+      })
+      .catch((err) => res.send(err.message));
   }
 });
 
 router.post("/", (req, res) => {
   const user = req.body;
-  users.push(user);
-  res.send({
-    msg: "User added sucessfully",
-    user: user,
-  });
+  User.create(user)
+    .then((usr) =>
+      res.send({
+        msg: "User created sucessfully.",
+        usr,
+      })
+    )
+    .catch((err) => res.send(err.message));
 });
 
 router.put("/:id", (req, res) => {
-  const userId = req.params.id;
-  const userName = req.body.name;
-  const user = users.find((user) => user.id == userId);
-  if (user) {
-    user.name = userName;
-    res.send({ msg: "User has been updated", user: user });
-  } else res.status(404).send({ error: `User with id ${userId} not found` });
+  User.findByIdAndUpdate(
+    req.params.id,
+    {
+      $set: req.body,
+    },
+    { new: true }
+  )
+    .then((user) => {
+      res.send({
+        msg: "User info has been updated.",
+        user,
+      });
+    })
+    .catch((err) => res.send(err.message));
 });
 
 router.delete("/:id", (req, res) => {
-  const userId = req.params.id;
-  const user = users.find((user) => user.id == userId);
-  if (user) {
-    users = users.filter(user => user.id != userId);
-    res.send({ msg: "User deleted sucessfully" });
-  } else res.status(404).send({ error: `User with id ${userId} not found` });
+  User.findByIdAndRemove(req.params.id)
+  .then((user) =>
+    res.send({
+      msg: 'User deleted!',
+      user,
+    })
+  )
+  .catch((err) => res.send(err.message));
 });
 
 module.exports = router;

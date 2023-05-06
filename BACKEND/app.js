@@ -1,31 +1,41 @@
 const express = require("express");
+const mongoose = require("mongoose");
+
+
+//router
 const userRouter = require("./routes/users");
 
-const logger = require('./middlewares/logger')
+//Middlewares
+const logger = require("./middlewares/logger");
 
 const PORT = 4000;
 const app = express();
-app.use(express.json()); //Middleware to parse json body received in request.
-app.use(express.static('public')); //Middleware to make public folder to serve static content
 
+//Connecting database
+mongoose.connect('mongodb://localhost:27017/quiz')
+.then(()=>{
+  app.listen(PORT, () => console.log(`Express app runniing on http://localhost:${PORT}`));
+})
+.catch((err)=>console.log('Err: ', err.message))
+
+app.use(express.json()); //Middleware to parse json body received in request.
+app.use(express.static("public")); //Middleware to make public folder to serve static content
 
 //Custom middleware
 
-app.use((req, res, next)=>{
-  console.log(req.method, req.url)
-  next()
-})
+app.use((req, res, next) => {
+  console.log(req.method, req.url);
+  next();
+});
 
 //External custom middleware that runs only in development environment
-if(app.get('env')=='development'){
+if (app.get("env") == "development") {
   app.use(logger);
 }
 
 app.get("/api", (req, res) => {
   res.status(200).send({ status: "Server is running" });
 });
-
- 
 
 app.use("/api/users", userRouter);
 
@@ -47,9 +57,4 @@ app.use("/api/users", userRouter);
 //     const query =request.query
 //     console.log(query.id)
 // })
-
-app.listen(PORT, () => console.log(`Express app runniing on ${PORT}`));
-
-
-
 
