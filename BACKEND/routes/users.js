@@ -3,6 +3,8 @@ const User = require("../models/userSchema");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
+const createToken = require('../utils/createToken')
+const checkAuth = require('../middlewares/checkAuth')
 
 // function to create error response
 function createErrorResponse(status, message) {
@@ -43,12 +45,17 @@ router.post("/signup", async (req, res) => {
       //   maxAge: 2 * 60 * 1000,
       // });
 
-      req.session.isAuth = true;
+      //setting session info
+      // req.session.isAuth = true;
+
+      //token based authentication
+      const token = createToken(user._id);
+
 
       res.send({
         status: 200,
         message: "User registered sucessfully",
-        user,
+        token,
       });
     } catch (e) {
       res.status(400).send(createErrorResponse(400, e.message));
@@ -68,10 +75,10 @@ router.post("/login", async (req, res) => {
 
   //checking session info
 
-  if (req.session.isAuth) {
-    res.status(400).send("You are already logged in");
-    return;
-  }
+  // if (req.session.isAuth) {
+  //   res.status(400).send("You are already logged in");
+  //   return;
+  // }
 
   // validating email format
   if (!validator.isEmail(email)) {
@@ -102,9 +109,13 @@ router.post("/login", async (req, res) => {
         // });
 
         //setting session info
-        req.session.isAuth = true;
+        // req.session.isAuth = true;
 
-        res.send({ status: 200, message: "Login Successful" });
+        //token based authentication
+        const token = createToken(user._id);
+
+
+        res.send({ status: 200, message: "Login Successful", token });
       } else {
         res.status(400).send(createErrorResponse(400, "Incorrect Password"));
       }
@@ -131,12 +142,13 @@ router.post("/logout", (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", checkAuth, async (req, res) => {
   const query = req.query;
   if (query.id) {
     // using async await
     try {
       const user = await User.findById(query.id);
+      console.log(req.user);
       res.send(user);
     } catch (e) {
       res.send(e.message);
@@ -152,7 +164,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {
+router.post("/", checkAuth, (req, res) => {
   const user = req.body;
   User.create(user)
     .then((usr) =>
@@ -181,7 +193,7 @@ router.put("/:id", (req, res) => {
     .catch((err) => res.send(err.message));
 });
 
-router.delete("/:id", (req, res) => {
+router.delete("/:id", checkAuth, (req, res) => {
   User.findByIdAndRemove(req.params.id)
     .then((user) =>
       res.send({
