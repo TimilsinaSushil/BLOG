@@ -7,6 +7,10 @@ const cookieParser = require('cookie-parser')
 //for session
 const session = require('express-session')
 const MongoDBSession = require('connect-mongodb-session')(session) //to store session info in mongo db
+
+//for env
+require('dotenv').config();
+
 const store = new MongoDBSession({
   uri:'mongodb://localhost:27017/quiz',
   collection:'session'
@@ -19,7 +23,7 @@ const userRouter = require("./routes/users");
 //Middlewares
 const logger = require("./middlewares/logger");
 
-const PORT = 4000;
+const PORT = process.env.PORT;
 const app = express();
 
 //Connecting database
@@ -34,7 +38,7 @@ app.use(express.json()); //Middleware to parse json body received in request.
 // app.use(cookieParser("1234-5678")); //Middleware to parse cookie (cookie is singned usinf provided key)
  
 app  .use(session({
-  secret:"1234-5678", //for signing cookie
+  secret:process.env.SESSION_SECRET, //for signing cookie
   resave:false, // if there is no change in session it will not resave in database
   saveUninitialized: false, //Doesn't save set bu uninitialized session
   store:store //defined above (This is where session info stores in db)
