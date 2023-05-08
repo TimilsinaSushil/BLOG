@@ -1,8 +1,7 @@
-const User = require("../models/userSchema");
+const User = require("../../models/user/userSchema");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
-const createToken = require("../utils/createToken");
-const checkAuth = require("../middlewares/checkAuth");
+const createToken = require("../../utils/createToken");
 
 //function to create error response
 function createErrorResponse(status, message) {

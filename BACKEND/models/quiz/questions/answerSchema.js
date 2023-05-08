@@ -11,7 +11,9 @@ const answerSchema = new Schema({
   correct: {
     type: Boolean,
     default: false,
-    required: true
-  }
-
+    required: true,
+  },
 });
+
+const Answer = mongoose.model("Answer", answerSchema);
+module.exports = Answer;

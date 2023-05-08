@@ -9,3 +9,9 @@ const questionCategorySchema = new Schema({
     maxlength: 20,
   },
 });
+
+const QuestionCategory = mongoose.model(
+  "QuestionCategory",
+  questionCategorySchema
+);
+module.exports = QuestionCategory;

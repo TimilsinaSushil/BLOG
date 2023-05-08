@@ -1,7 +1,7 @@
 const express = require("express");
-const { signup, login, logout } = require("../controllers/userController");
+const { signup, login, logout } = require("../controllers/user/userController");
 
-const User = require("../models/userSchema");
+const User = require("../models/user/userSchema");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
