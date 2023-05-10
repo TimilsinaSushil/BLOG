@@ -2,6 +2,7 @@ const https = require("https");
 const fs = require("fs");
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require('cors')
 
 //for cookies
 const cookieParser = require("cookie-parser");
@@ -29,12 +30,18 @@ const logger = require("./middlewares/logger");
 const PORT = process.env.PORT;
 const app = express();
 
-//for ssl
+//enabling ssl
 var options = {
   key: fs.readFileSync(__dirname + "/private.key"),
   cert: fs.readFileSync(__dirname + "/certificate.pem"),
 };
 const server = https.createServer(options, app);
+
+//enabling cors
+app.use(cors({
+  origin: ['https://localhost:3000','https://www.example.com'],
+  methods: ['GET','POST','PUT','PATCH','DELETE']
+}))
 
 //Connecting database
 mongoose
@@ -74,9 +81,12 @@ if (app.get("env") == "development") {
   app.use(logger);
 }
 
-app.get("/api", (req, res) => {
+app.get("/", (req, res) => {
   res.status(200).send({ status: "Server is running" });
 });
+app.options('/',(req,res)=>{
+  res.sendStatus(204)
+})
 
 app.use("/api/users", userRouter);
 app.use("/api/quiz", quizRouter);
