@@ -1,0 +1,3 @@
+openssl genrsa 1024 > private.key (it is used to sign certificate)
+openssl req -new -key private.key -out cert.csr (to create certificate sign request (csr) file file)
+openssl x509 -req -in cert.csr -signkey private.key -out certificate.pem (to generate ssl certificate)

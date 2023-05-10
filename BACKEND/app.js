@@ -1,3 +1,5 @@
+const https = require("https");
+const fs = require("fs");
 const express = require("express");
 const mongoose = require("mongoose");
 
@@ -7,7 +9,6 @@ const cookieParser = require("cookie-parser");
 //for session
 const session = require("express-session");
 const MongoDBSession = require("connect-mongodb-session")(session); //to store session info in mongo db
-
 
 //for env
 require("dotenv").config();
@@ -28,12 +29,19 @@ const logger = require("./middlewares/logger");
 const PORT = process.env.PORT;
 const app = express();
 
+//for ssl
+var options = {
+  key: fs.readFileSync(__dirname + "/private.key"),
+  cert: fs.readFileSync(__dirname + "/certificate.pem"),
+};
+const server = https.createServer(options, app);
+
 //Connecting database
 mongoose
   .connect("mongodb://localhost:27017/quiz")
   .then(() => {
-    app.listen(PORT, () =>
-      console.log(`Express app runniing on http://localhost:${PORT}`)
+    server.listen(PORT, () =>
+      console.log(`Express app runniing on https://localhost:${PORT}`)
     );
   })
   .catch((err) => console.log("Err: ", err.message));
@@ -73,8 +81,6 @@ app.get("/api", (req, res) => {
 app.use("/api/users", userRouter);
 app.use("/api/quiz", quizRouter);
 app.use("/api/upload", uploadRouter);
-
-
 
 // app.get('/api/greet', (req,res)=>{
 //     res.send({msg:'Hello Everyone'})
