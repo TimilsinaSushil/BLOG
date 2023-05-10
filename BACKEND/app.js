@@ -8,6 +8,7 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const MongoDBSession = require("connect-mongodb-session")(session); //to store session info in mongo db
 
+
 //for env
 require("dotenv").config();
 
@@ -19,6 +20,7 @@ const store = new MongoDBSession({
 //router
 const userRouter = require("./routes/users");
 const quizRouter = require("./routes/quiz");
+const uploadRouter = require("./routes/upload");
 
 //Middlewares
 const logger = require("./middlewares/logger");
@@ -36,9 +38,11 @@ mongoose
   })
   .catch((err) => console.log("Err: ", err.message));
 
+app.use(express.urlencoded({ extended: true })); // Middleware required to submit form data
+
 app.use(express.json()); //Middleware to parse json body received in request.
 
-// app.use(cookieParser("1234-5678")); //Middleware to parse cookie (cookie is singned usinf provided key)
+// app.use(cookieParser("1234-5678")); //Middleware to parse cookie (cookie is singned user provided key)
 
 app.use(
   session({
@@ -68,6 +72,9 @@ app.get("/api", (req, res) => {
 
 app.use("/api/users", userRouter);
 app.use("/api/quiz", quizRouter);
+app.use("/api/upload", uploadRouter);
+
+
 
 // app.get('/api/greet', (req,res)=>{
 //     res.send({msg:'Hello Everyone'})
