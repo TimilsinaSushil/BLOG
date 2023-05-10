@@ -3,9 +3,6 @@ const { signup, login, logout } = require("../controllers/user/userController");
 
 const User = require("../models/user/userSchema");
 const router = express.Router();
-const bcrypt = require("bcryptjs");
-const validator = require("validator");
-const createToken = require("../utils/createToken");
 const checkAuth = require("../middlewares/checkAuth");
 
 //signup

@@ -20,7 +20,8 @@ const userSchema = new Schema(
       required: [true, 'Password missing'],
     },
   },
-  { timestamps: true }
+  { timestamps: true },
+  { versionKey: false }
 );
 
 const User = mongoose.model("User", userSchema);
