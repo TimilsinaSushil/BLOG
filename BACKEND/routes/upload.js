@@ -8,7 +8,7 @@ const storage = multer.diskStorage({
     callback(null, "public/uploads/avatars");
   },
   filename: (req, file, callback) => {
-    callback(null, file.originalname);
+    callback(null, Date.now() + file.originalname);
   },
 });
 
@@ -27,18 +27,18 @@ const uploadSingle = multer({
 });
 
 const multiStorage = multer.diskStorage({
-    destination: (req, file, callback) => {
-      callback(null, "public/uploads/photos");
-    },
-    filename: (req, file, callback) => {
-      callback(null, file.originalname);
-    },
-  });
+  destination: (req, file, callback) => {
+    callback(null, "public/uploads/photos");
+  },
+  filename: (req, file, callback) => {
+    callback(null, Date.now() + file.originalname);
+  },
+});
 
 const uploadMultiple = multer({
-    storage: multiStorage,
-    limits: { fileSize: 0.1 * 1024 * 1024 },
-  });
+  storage: multiStorage,
+  limits: { fileSize: 0.1 * 1024 * 1024 },
+});
 
 router.post(
   "/profile",
@@ -61,5 +61,9 @@ router.post(
     });
   }
 );
+
+router.get("/download", (req, res) => {
+  res.download(`./public/uploads/${req.query.directory}/${req.query.filename}`);
+});
 
 module.exports = router;
