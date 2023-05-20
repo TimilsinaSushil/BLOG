@@ -9,8 +9,8 @@ module.exports = async (req, res, next) => {
   const token = authorization.split(" ")[1];
 
   try {
-    const _id = jwt.verify(token, "1234-5678");
-    req.user = await User.findById(_id).select("email name ");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id).select("email name ");
     next();
   } catch (e) {
     res.status(401).send({

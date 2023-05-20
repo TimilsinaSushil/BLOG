@@ -34,7 +34,7 @@ const signup = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
   
-        const user = await User.create({ email, name, password: hashedPassword });
+        const user = await User.create({ email, name, password: hashedPassword, role:'user' });
   
         //setting cookie in response
         // res.cookie("user", user.email, {
@@ -46,7 +46,7 @@ const signup = async (req, res) => {
         // req.session.isAuth = true;
   
         //token based authentication
-        const token = createToken(user._id);
+        const token = createToken({id:user._id,role:user.role});
   
   
         res.send({
@@ -111,7 +111,7 @@ const signup = async (req, res) => {
           // req.session.isAuth = true;
   
           //token based authentication
-          const token = createToken(user._id);
+          const token = createToken({id:user._id,role:user.role});
   
   
           res.send({ status: 200, message: "Login Successful", token });

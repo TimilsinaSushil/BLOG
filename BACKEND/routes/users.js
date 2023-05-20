@@ -27,7 +27,7 @@ router.get("/", checkAuth, async (req, res) => {
   } else {
     //using promises
     User.find()
-      .select("name email -_id")
+      .select("name email role -_id")
       .then((users) => {
         res.send(users);
       })
