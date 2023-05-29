@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const checkAuth = require("../middlewares/checkAuth");
+const { checkAuth, isAdmin } = require("../middlewares/checkAuth");
 const {
   getQuiz,
   createQuiz,
@@ -17,18 +17,18 @@ const {
 
 router.get("/", getQuiz);
 
-router.post("/", checkAuth, createQuiz);
+router.post("/", checkAuth, isAdmin, createQuiz);
 
-router.put("/:id", checkAuth, updateQuiz);
+router.put("/:id", checkAuth, isAdmin, updateQuiz);
 
-router.delete("/:id", checkAuth, deleteQuiz);
+router.delete("/:id", checkAuth, isAdmin, deleteQuiz);
 
 router.get("/category", getQuizCategory);
 
-router.post("/category", checkAuth, createQuizCategory);
+router.post("/category", checkAuth, isAdmin, createQuizCategory);
 
-router.put("/category/:id", checkAuth, updateQuizCategory);
+router.put("/category/:id", checkAuth, isAdmin, updateQuizCategory);
 
-router.delete("/category/:id", checkAuth, deleteQuizCategory);
+router.delete("/category/:id", checkAuth, isAdmin, deleteQuizCategory);
 
 module.exports = router;

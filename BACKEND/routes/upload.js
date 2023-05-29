@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const checkAuth = require("../middlewares/checkAuth");
+const { checkAuth } = require("../middlewares/checkAuth");
 
 const storage = multer.diskStorage({
   destination: (req, file, callback) => {
@@ -62,7 +62,7 @@ router.post(
   }
 );
 
-router.get("/download", (req, res) => {
+router.get("/download", checkAuth, (req, res) => {
   res.download(`./public/uploads/${req.query.directory}/${req.query.filename}`);
 });
 

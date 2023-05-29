@@ -3,15 +3,15 @@ const { signup, login, logout } = require("../controllers/user/userController");
 
 const User = require("../models/user/userSchema");
 const router = express.Router();
-const checkAuth = require("../middlewares/checkAuth");
+const { checkAuth, isAdmin, isUser } = require("../middlewares/checkAuth");
 
 //signup
 router.post("/signup", signup);
- 
+
 router.post("/login", login);
 
 //Logout
-router.post("/logout", logout);
+router.post("/logout", checkAuth, logout);
 
 router.get("/", checkAuth, async (req, res) => {
   const query = req.query;
@@ -35,7 +35,7 @@ router.get("/", checkAuth, async (req, res) => {
   }
 });
 
-router.post("/", checkAuth, (req, res) => {
+router.post("/", checkAuth, isAdmin, (req, res) => {
   const user = req.body;
   User.create(user)
     .then((usr) =>
@@ -47,7 +47,7 @@ router.post("/", checkAuth, (req, res) => {
     .catch((err) => res.send(err.message));
 });
 
-router.put("/:id", (req, res) => {
+router.put("/:id", checkAuth, isAdmin, (req, res) => {
   User.findByIdAndUpdate(
     req.params.id,
     {
@@ -64,7 +64,7 @@ router.put("/:id", (req, res) => {
     .catch((err) => res.send(err.message));
 });
 
-router.delete("/:id", checkAuth, (req, res) => {
+router.delete("/:id", checkAuth, isAdmin, (req, res) => {
   User.findByIdAndRemove(req.params.id)
     .then((user) =>
       res.send({
